@@ -7,8 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import"AdminCell.h"
 
-@interface Admin : UITableViewController<UITextFieldDelegate>
-- (IBAction)AddAdmin:(id)sender;
+@interface Admin : UITableViewController<UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate>
+
+@property(strong,nonatomic) NSMutableArray *AdminList;
+
+@property (strong, nonatomic) IBOutlet UITextField *AdminName;
+@property (strong, nonatomic) IBOutlet UITextField *AdminPassword;
+
+@property (weak, nonatomic) IBOutlet UINavigationItem *AdminNavigation;
 
 @end

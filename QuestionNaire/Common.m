@@ -17,30 +17,32 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self initAdd];
+    self.navigationItem.rightBarButtonItem=self.editButtonItem;
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
+    self.tableView.delegate=self;
+    self.tableView.dataSource=self;
     
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.txtName.hidden=YES;
+    self.txtName.delegate=self;
+    
+    self.txtPassword.hidden=YES;
+    self.txtPassword.delegate=self;
+    
+    self.txtYesOrNo.hidden=YES;
+    self.txtYesOrNo.delegate=self;
+    
+    
+    //读取数据源文件plist
+    NSBundle *bundle=[NSBundle mainBundle];
+    NSString *plist=[bundle pathForResource:@"CommonIn" ofType:@"plist"];
+    //涉及到单元格的删除和添加，listTeams应设置成可变的Array
+    self.listTeams=[[NSMutableArray alloc]initWithContentsOfFile:plist];
+    
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
-    return 0;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
-    return 0;
 }
 
 //textField控件放弃第一个响应者的身份
@@ -49,135 +51,107 @@
     return YES;
 }
 
-
--(void)initAdd{
-
-    CGRect rect=[UIScreen mainScreen].bounds;
-    UIView *view1=[[UIView alloc]initWithFrame:rect];
-    view1.tag=22;
-    view1.hidden=YES;
-    //设置view的背景颜色和不透明度
-    view1.backgroundColor=[UIColor colorWithRed:0.2f green:0.2f  blue:0.2f  alpha:0.7f ];
-    [self.view addSubview:view1];
-    
-    CGRect rect2=CGRectMake(75, 10, 230, 160);
-    UIView *view2=[[UIView alloc]initWithFrame:rect2];
-    view2.tag=23;
-    view2.hidden=YES;
-    view2. backgroundColor=[UIColor colorWithWhite:1.0 alpha:1.0];
-    [view1 addSubview:view2];
-    
-    UILabel *label1=[[UILabel alloc]initWithFrame:CGRectMake(70,10, 100, 20)];
-    label1.font=[UIFont systemFontOfSize:15.0f];
-    label1.text=@"添加新用户：";
-    
-    UILabel *label2=[[UILabel alloc]initWithFrame:CGRectMake(10, 50,55, 30)];
-    label2.text=@"用户名：";
-    label2.font=[UIFont systemFontOfSize:13.0f];
-    
-    UITextField *txtOriginal=[[UITextField alloc]initWithFrame:CGRectMake(70,50, 150, 30)];
-    txtOriginal.delegate=self;
-    txtOriginal.placeholder=@"input userName...";
-    txtOriginal.borderStyle=UITextBorderStyleRoundedRect;
-    
-    UILabel *label3=[[UILabel alloc]initWithFrame:CGRectMake(10, 90,55, 20)];
-    label3.text=@"密码：";
-    label3.font=[UIFont systemFontOfSize:13.0f];
-    
-    UITextField *txtNew=[[UITextField alloc]initWithFrame:CGRectMake(70,90, 150, 30)];
-    txtNew.delegate=self;
-    txtNew.placeholder=@"input password...";
-    txtNew.borderStyle=UITextBorderStyleRoundedRect;
-    
-    UIButton *button=[UIButton buttonWithType:UIButtonTypeRoundedRect];
-    button.frame=CGRectMake(100.0f, 130.0f, 20.0f, 20.0f);
-    [button setTitle:@"OK" forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor colorWithRed:0.0f green:0.4f blue:0.8f alpha:1.0] forState:UIControlStateNormal];
-    button.titleLabel.font=[UIFont systemFontOfSize:14.0f];
-    button.backgroundColor=[UIColor clearColor];
-    //给button添加委托方式，即点击触发事件
-    [button addTarget:self action:@selector(touchButton) forControlEvents:UIControlEventTouchUpInside];
-    
-    [view2 addSubview:label1];
-    [view2 addSubview:label2];
-    [view2 addSubview:label3];
-    [view2 addSubview:txtOriginal];
-    [view2 addSubview:txtNew];
-    [view2 addSubview:button];
-
+#pragma mark - Table view data source
+//返回单元格的总数目
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.listTeams count]+1;
 }
 
--(void)touchButton{
-
-    UIView *view1=(UIView *)[self.view viewWithTag:22];
-    UIView *view2=(UIView *)[view1 viewWithTag:23];
-    
-    view1.hidden=YES;
-    view2.hidden=YES;
-
-}
-
-/*
+//设置每个单元格的内容
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
+    static NSString *CellIdentifier=@"CellIdentifier";
     
-    // Configure the cell...
+    CommonCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    BOOL  addCell=(indexPath.row==self.listTeams.count);
     
+    //这个if语句没有，将导致错误
+    if(cell==nil){
+    
+        cell=[[CommonCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"CellIdentifier"];
+    }
+    if(!addCell){
+        NSUInteger row=[indexPath row];
+        NSDictionary *rowDict=[self.listTeams objectAtIndex:row];
+        cell.Name.text=[rowDict objectForKey:@"Name"];
+        cell.Password.text=[rowDict objectForKey:@"Password"];
+        cell.YesOrNo.text=[rowDict objectForKey:@"YesOrNo"];
+    }else{
+    
+        self.txtName.frame=CGRectMake(10.0f, 10.0f, 70.0f, 30.0f);
+        self.txtName.placeholder=@"Name";
+        self.txtPassword.frame=CGRectMake(110.0f, 10.0f, 80.0f, 30.0f);
+        self.txtPassword.placeholder=@"Password";
+        
+        self.txtYesOrNo.frame=CGRectMake(200.0f, 10.0f, 70.0f, 30.0f);
+        self.txtYesOrNo.placeholder=@"Yes/No";
+        
+        [cell.contentView addSubview:self.txtName];
+        [cell.contentView addSubview:self.txtPassword];
+        [cell.contentView addSubview:self.txtYesOrNo];
+        
+    }
     return cell;
 }
-*/
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
+-(void)setEditing:(BOOL)editing animated:(BOOL)animated{
+    
+    [super setEditing:editing animated:animated];
+    [self.tableView setEditing:editing animated:YES];
+    
+    if(editing){
+        
+        self.txtName.hidden=NO;
+        self.txtPassword.hidden=NO;
+        self.txtYesOrNo.hidden=NO;
+        
+    }else{
+        
+        self.txtName.hidden=YES;
+        self.txtPassword.hidden=YES;
+        self.txtYesOrNo.hidden=YES;
+    }
+}
+
+//当进行插入或者删除操作时，对单元格的图标进行设置
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    if(indexPath.row==[self.listTeams count]){
+        return UITableViewCellEditingStyleInsert;
+    }
+    
+    return UITableViewCellEditingStyleDelete;
+
+}
+
+-(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(nonnull NSIndexPath *)indexPath{
+    
+    if(editingStyle==UITableViewCellEditingStyleDelete){
+        [self.listTeams removeObjectAtIndex:indexPath.row];
+        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        [self.tableView reloadData];
+    
+    }else if(editingStyle==UITableViewCellEditingStyleInsert){
+    
+        NSDictionary *addDict=[NSDictionary dictionaryWithObjectsAndKeys:self.txtName.text,@"Name",self.txtPassword.text,@"Password",self.txtYesOrNo.text,@"YesOrNo", nil];
+        
+        
+        [self.listTeams insertObject:addDict atIndex:[self.listTeams count]];
+
+        [self.tableView insertRowsAtIndexPaths:[NSArray  arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        [self.tableView reloadData];
+    
+    }
+
+}
+
+//使得单元格在被选择时处于高亮状态；
+-(BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath{
+
+    if(indexPath.row==[self.listTeams count]){
+        return NO;
+    }
     return YES;
-}
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
 }
-*/
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
-- (IBAction)AddCommon:(id)sender {
-    
-    UIView *view1=(UIView *)[self.view viewWithTag:22];
-    UIView *view2=(UIView *)[view1 viewWithTag:23];
-    
-    view1.hidden=NO;
-    view2.hidden=NO;
-    
-}
 @end

@@ -7,8 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CommonCell.h"
 
-@interface Common : UITableViewController<UITextFieldDelegate>
-- (IBAction)AddCommon:(id)sender;
+@interface Common : UITableViewController<UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic,strong) NSMutableArray *listTeams;
+
+@property (weak, nonatomic) IBOutlet UINavigationItem *navigationItem;
+@property (strong, nonatomic) IBOutlet UITextField *txtName;
+@property (strong, nonatomic) IBOutlet UITextField *txtPassword;
+@property (strong, nonatomic) IBOutlet UITextField *txtYesOrNo;
 
 @end
