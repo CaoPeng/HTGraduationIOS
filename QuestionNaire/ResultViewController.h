@@ -10,4 +10,6 @@
 
 @interface ResultViewController : UIViewController
 
+- (IBAction)Show:(id)sender;
+
 @end

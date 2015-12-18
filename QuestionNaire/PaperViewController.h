@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface PaperViewController : UIViewController
+- (IBAction)paper:(id)sender;
 
 @end

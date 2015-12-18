@@ -17,6 +17,7 @@
 @synthesize txtUserName;
 @synthesize txtPassWord;
 @synthesize txtAffirm;
+@synthesize anwser;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -24,6 +25,7 @@
     txtUserName.delegate=self;
     txtPassWord.delegate=self;
     txtAffirm.delegate=self;
+    anwser.delegate=self;
     
     // Do any additional setup after loading the view.
 }
@@ -43,6 +45,11 @@
 
 
 //关闭模态视图，回到原始登录界面
+- (IBAction)exit:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:^{}];
+    
+}
+
 - (IBAction)Done:(id)sender {
     
     if([txtAffirm.text isEqual:@""]||[txtPassWord isEqual:@""]||[txtUserName.text isEqual:@""]){

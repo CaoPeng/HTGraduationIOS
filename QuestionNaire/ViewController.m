@@ -179,7 +179,7 @@
     
     //管理员登录跳转
     //获取将要跳转的标签导航视图
-    UITabBarController *tabViewController=[mainStoryBoard2 instantiateViewControllerWithIdentifier:@"TabViewController"];
+    UITabBarController *tabViewController=[mainStoryBoard2 instantiateViewControllerWithIdentifier:@"TabView"];
     tabViewController.modalTransitionStyle=UIModalTransitionStyleCoverVertical;
     if(flag2==1){
         //启动模态视图

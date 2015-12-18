@@ -1,3 +1,4 @@
+
 //
 //  UserViewController.h
 //  QuestionNaire
@@ -8,6 +9,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UserViewController : UIViewController
+@interface UserViewController : UITableViewController<UITextFieldDelegate>
+- (IBAction)UserExit:(id)sender;
+
+- (IBAction)change:(id)sender;
 
 @end

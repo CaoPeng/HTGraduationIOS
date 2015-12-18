@@ -10,4 +10,7 @@
 
 @interface QuestionViewController : UIViewController
 
+- (IBAction)question:(id)sender;
+
+
 @end

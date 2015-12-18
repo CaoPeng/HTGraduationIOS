@@ -12,9 +12,10 @@
 
 @property (weak, nonatomic) IBOutlet UITextField *txtUserName;
 @property (weak, nonatomic) IBOutlet UITextField *txtPassWord;
-
 @property (weak, nonatomic) IBOutlet UITextField *txtAffirm;
+@property (weak, nonatomic) IBOutlet UITextField *anwser;
 
+- (IBAction)exit:(id)sender;
 
 - (IBAction)Done:(id)sender;
 
