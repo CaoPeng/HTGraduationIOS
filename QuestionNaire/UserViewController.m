@@ -37,24 +37,24 @@
     view2. backgroundColor=[UIColor colorWithWhite:1.0 alpha:1.0];
     [view1 addSubview:view2];
     
-    UILabel *label1=[[UILabel alloc]initWithFrame:CGRectMake(90,10, 100, 30)];
+    UILabel *label1=[[UILabel alloc]initWithFrame:CGRectMake(95,10, 100, 30)];
     label1.font=[UIFont systemFontOfSize:15.0f];
     label1.text=@"修改密码：";
     
-    UILabel *label2=[[UILabel alloc]initWithFrame:CGRectMake(10, 50,70, 30)];
+    UILabel *label2=[[UILabel alloc]initWithFrame:CGRectMake(10, 50,65, 30)];
     label2.text=@"原密码：";
     label2.font=[UIFont systemFontOfSize:13.0f];
     
-    UITextField *txtOriginal=[[UITextField alloc]initWithFrame:CGRectMake(90,50, 160, 30)];
+    UITextField *txtOriginal=[[UITextField alloc]initWithFrame:CGRectMake(80,50, 170, 30)];
     txtOriginal.delegate=self;
     txtOriginal.placeholder=@"Original password...";
     txtOriginal.borderStyle=UITextBorderStyleRoundedRect;
     
-    UILabel *label3=[[UILabel alloc]initWithFrame:CGRectMake(10, 100,70, 30)];
+    UILabel *label3=[[UILabel alloc]initWithFrame:CGRectMake(10, 100,65, 30)];
     label3.text=@"新密码：";
     label3.font=[UIFont systemFontOfSize:13.0f];
     
-    UITextField *txtNew=[[UITextField alloc]initWithFrame:CGRectMake(90,100, 160, 30)];
+    UITextField *txtNew=[[UITextField alloc]initWithFrame:CGRectMake(80,100, 170, 30)];
     txtNew.delegate=self;
     txtNew.placeholder=@"New password...";
     txtNew.borderStyle=UITextBorderStyleRoundedRect;

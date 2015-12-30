@@ -17,6 +17,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [self.searchBar setShowsScopeBar:NO];
+    [self.searchBar sizeToFit];
+    
+    self.searchBar.delegate=self;
+    
     self.navigationItem.rightBarButtonItem=self.editButtonItem;
     
     self.tableView.delegate=self;
@@ -38,6 +43,14 @@
     //涉及到单元格的删除和添加，listTeams应设置成可变的Array
     self.listTeams=[[NSMutableArray alloc]initWithContentsOfFile:plist];
     
+    [self filterContentForSearText:@"" scope:-1];
+    
+}
+
+- (void)viewDidUnload
+{
+    [self setSearchBar:nil];
+    [super viewDidUnload];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -54,44 +67,75 @@
 #pragma mark - Table view data source
 //返回单元格的总数目
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.listTeams count]+1;
+    if(tableView==self.tableView){
+        return [self.listTeams count]+1;
+    }else{
+        return [self.listFilterTeams count];
+    }
+
 }
 
 //设置每个单元格的内容
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *CellIdentifier=@"CellIdentifier";
     
-    CommonCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    BOOL  addCell=(indexPath.row==self.listTeams.count);
-    
-    //这个if语句没有，将导致错误
+    CommonCell *cell = [tableView dequeueReusableCellWithIdentifier:@"CellIdentifier"];
+    //这个if语句没有，将导致显示错误
     if(cell==nil){
-    
         cell=[[CommonCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"CellIdentifier"];
     }
-    if(!addCell){
-        NSUInteger row=[indexPath row];
-        NSDictionary *rowDict=[self.listTeams objectAtIndex:row];
-        cell.Name.text=[rowDict objectForKey:@"Name"];
-        cell.Password.text=[rowDict objectForKey:@"Password"];
-        cell.YesOrNo.text=[rowDict objectForKey:@"YesOrNo"];
+
+    BOOL  addCell=(indexPath.row==self.listTeams.count);
+
+    if(tableView==self.tableView){
+        if(!addCell){
+            NSUInteger row=[indexPath row];
+            NSDictionary *rowDict=[self.listTeams
+                                   objectAtIndex:row];
+            cell.Name.text=[rowDict objectForKey:@"Name"];
+            cell.Password.text=[rowDict objectForKey:@"Password"];
+            cell.YesOrNo.text=[rowDict objectForKey:@"YesOrNo"];
+
+        }else{
+            
+            self.txtName.frame=CGRectMake(10.0f, 10.0f, 70.0f, 30.0f);
+            self.txtName.placeholder=@"Name";
+            self.txtPassword.frame=CGRectMake(95.0f, 10.0f, 80.0f, 30.0f);
+            self.txtPassword.placeholder=@"Password";
+            self.txtYesOrNo.frame=CGRectMake(190.0f, 10.0f, 70.0f, 30.0f);
+            self.txtYesOrNo.placeholder=@"Yes/No";
+            
+            [cell.contentView addSubview:self.txtName];
+            [cell.contentView addSubview:self.txtPassword];
+            [cell.contentView addSubview:self.txtYesOrNo];
+            
+        }
+  
     }else{
-    
-        self.txtName.frame=CGRectMake(10.0f, 10.0f, 70.0f, 30.0f);
-        self.txtName.placeholder=@"Name";
-        self.txtPassword.frame=CGRectMake(110.0f, 10.0f, 80.0f, 30.0f);
-        self.txtPassword.placeholder=@"Password";
+        //删除cell中已经存在的控件，避免cell的内容的重叠
+        while ([cell.contentView.subviews lastObject]!=nil) {
+            [(UIView *)[cell.contentView.subviews lastObject]removeFromSuperview];
+        }
         
-        self.txtYesOrNo.frame=CGRectMake(200.0f, 10.0f, 70.0f, 30.0f);
-        self.txtYesOrNo.placeholder=@"Yes/No";
+        NSUInteger row=[indexPath row];
+        NSDictionary *rowDict=[self.listFilterTeams
+                               objectAtIndex:row];
+        UILabel *labelName=[[UILabel alloc]initWithFrame:CGRectMake(10, 10, 70, 30)];
+        UILabel *labelPassword=[[UILabel alloc]initWithFrame:CGRectMake(90, 10, 80, 30)];
+        UILabel *labelYesOrNo=[[UILabel alloc]initWithFrame:CGRectMake(180, 10, 130, 30)];
+        labelName.text=[rowDict objectForKey:@"Name"];
+        labelPassword.text=[rowDict objectForKey:@"Password"];
+        labelYesOrNo.text=[rowDict objectForKey:@"YesOrNo"];
+        [cell.contentView addSubview:labelName];
+        [cell.contentView addSubview:labelPassword];
+        [cell.contentView addSubview:labelYesOrNo];
+
         
-        [cell.contentView addSubview:self.txtName];
-        [cell.contentView addSubview:self.txtPassword];
-        [cell.contentView addSubview:self.txtYesOrNo];
         
     }
+    
     return cell;
 }
+
 
 -(void)setEditing:(BOOL)editing animated:(BOOL)animated{
     
@@ -123,6 +167,7 @@
 
 }
 
+//插入删除操作
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(nonnull NSIndexPath *)indexPath{
     
     if(editingStyle==UITableViewCellEditingStyleDelete){
@@ -152,6 +197,44 @@
     }
     return YES;
 
+}
+
+//搜索
+-(void)filterContentForSearText:(NSString *)searchText scope:(NSUInteger)scope{
+
+    if([searchText length]==0){
+    
+        self.listFilterTeams=[NSMutableArray arrayWithArray:self.listTeams];
+        return;
+        
+    }
+    
+    NSPredicate *scopePredicate;
+    NSArray *tempArray;
+    
+    switch (scope) {
+        case 0:
+            scopePredicate=[NSPredicate predicateWithFormat:@"SELF.Name contains[c] %@",searchText];
+            tempArray=[self.listTeams filteredArrayUsingPredicate:scopePredicate];
+            self.listFilterTeams=[NSMutableArray arrayWithArray:tempArray];
+            break;
+        case 1:
+            scopePredicate=[NSPredicate predicateWithFormat:@"SELF.Password contains[c] %@",searchText];
+            tempArray=[self.listTeams filteredArrayUsingPredicate:scopePredicate];
+            self.listFilterTeams=[NSMutableArray arrayWithArray:tempArray];
+            break;
+        default:
+            self.listFilterTeams=[NSMutableArray arrayWithArray:self.listTeams];
+            break;
+    }
+}
+
+#pragma mark - UISearchDisplayController Delegate Methods
+//当文本内容发生改变时候，向表视图数据源发出重新加载消息
+-(BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString{
+    [self filterContentForSearText:searchString scope:self.searchBar.selectedScopeButtonIndex];
+    //YES情况下表视图可以重新加载
+    return  YES;
 }
 
 @end

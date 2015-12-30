@@ -34,8 +34,8 @@
 }
 */
 
-
-- (IBAction)Show:(id)sender {
+- (IBAction)ResultExit:(id)sender {
+    
     [self dismissViewControllerAnimated:YES completion:^{}];
     
 }

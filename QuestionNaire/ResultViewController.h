@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ResultViewController : UIViewController
+@interface ResultViewController : UITableViewController
 
-- (IBAction)Show:(id)sender;
+- (IBAction)ResultExit:(id)sender;
 
 @end

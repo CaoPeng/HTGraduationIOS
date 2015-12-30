@@ -8,9 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface QuestionViewController : UIViewController
+@interface QuestionViewController : UITableViewController
 
-- (IBAction)question:(id)sender;
+- (IBAction)Exit:(id)sender;
 
 
 @end

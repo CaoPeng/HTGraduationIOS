@@ -16,5 +16,6 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *YesOrNo;
 
+@property(weak,nonatomic) NSString *TestName;
 
 @end

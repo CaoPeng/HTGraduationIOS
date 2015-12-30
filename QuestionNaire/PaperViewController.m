@@ -34,7 +34,7 @@
 }
 */
 
-- (IBAction)paper:(id)sender {
+- (IBAction)PaperExit:(id)sender {
     
     [self dismissViewControllerAnimated:YES completion:^{}];
     

@@ -17,9 +17,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    self.AdminSearchbar.delegate=self;
     
     self.tableView.dataSource=self;
     self.tableView.delegate=self;
@@ -36,8 +36,6 @@
     //涉及到单元格的删除和添加，listTeams应设置成可变的Array
     self.AdminList=[[NSMutableArray alloc]initWithContentsOfFile:plist2];
     
-    NSLog(@"-->%d",(int)self.AdminList.count);
-    
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
@@ -53,7 +51,12 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
-    return [self.AdminList count]+1;
+    if(tableView==self.tableView){
+        return [self.AdminList count]+1;
+    }else{
+        return [self.AdminFilterList count];
+    }
+    
 }
 
 
@@ -69,26 +72,46 @@
         
         cell=[[AdminCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AdminCell"];
     }
-    if(!addCell){
-        NSUInteger row=[indexPath row];
-        NSDictionary *rowDict2=[self.AdminList objectAtIndex:row];
-        cell.AdminName.text=[rowDict2 objectForKey:@"Name"];
-        cell.AdminPassword.text=[rowDict2 objectForKey:@"Password"];
-
+    
+    if(tableView==self.tableView){
+        if(!addCell){
+            NSUInteger row=[indexPath row];
+            NSDictionary *rowDict=[self.AdminList objectAtIndex:row];
+            cell.AdminName.text=[rowDict objectForKey:@"Name"];
+            cell.AdminPassword.text=[rowDict objectForKey:@"Password"];
+            
+        }else{
+            
+            self.AdminName.frame=CGRectMake(30.0f, 10.0f, 90.0f, 30.0f);
+            self.AdminName.placeholder=@"Name...";
+            self.AdminPassword.frame=CGRectMake(150.0f, 10.0f, 90.0f, 30.0f);
+            self.AdminPassword.placeholder=@"Password...";
+            
+            
+            [cell.contentView addSubview:self.AdminName];
+            [cell.contentView addSubview:self.AdminPassword];
+        }
     }else{
+    
+        //删除cell中已经存在的控件，避免cell的内容的重叠
+        while ([cell.contentView.subviews lastObject]!=nil){
+            [(UIView *)[cell.contentView.subviews lastObject]removeFromSuperview];
+        }
         
-        self.AdminName.frame=CGRectMake(30.0f, 10.0f, 90.0f, 30.0f);
-        self.AdminName.placeholder=@"Name...";
-        self.AdminPassword.frame=CGRectMake(150.0f, 10.0f, 90.0f, 30.0f);
-        self.AdminPassword.placeholder=@"Password...";
+        NSUInteger row=[indexPath row];
+        NSDictionary *rowDict=[self.AdminFilterList
+                               objectAtIndex:row];
+        UILabel *labelName=[[UILabel alloc]initWithFrame:CGRectMake(30, 10, 90, 30)];
+        UILabel *labelPassword=[[UILabel alloc]initWithFrame:CGRectMake(150, 10, 90, 30)];
         
-        
-        [cell.contentView addSubview:self.AdminName];
-        [cell.contentView addSubview:self.AdminPassword];
-        
-    }
-    return cell;
+        labelName.text=[rowDict objectForKey:@"Name"];
+        labelPassword.text=[rowDict objectForKey:@"Password"];
 
+        [cell.contentView addSubview:labelName];
+        [cell.contentView addSubview:labelPassword];
+    }
+    
+    return cell;
 }
 
 -(void)setEditing:(BOOL)editing animated:(BOOL)animated{
@@ -149,5 +172,44 @@
     return YES;
     
 }
+
+//搜索
+-(void)filterContentForSearText:(NSString *)searchText scope:(NSUInteger)scope{
+    
+    if([searchText length]==0){
+        
+        self.AdminFilterList=[NSMutableArray arrayWithArray:self.AdminList];
+        return;
+        
+    }
+    
+    NSPredicate *scopePredicate;
+    NSArray *tempArray;
+    
+    switch (scope) {
+        case 0:
+            scopePredicate=[NSPredicate predicateWithFormat:@"SELF.Name contains[c] %@",searchText];
+            tempArray=[self.AdminList filteredArrayUsingPredicate:scopePredicate];
+            self.AdminFilterList=[NSMutableArray arrayWithArray:tempArray];
+            break;
+        case 1:
+            scopePredicate=[NSPredicate predicateWithFormat:@"SELF.Password contains[c] %@",searchText];
+            tempArray=[self.AdminList filteredArrayUsingPredicate:scopePredicate];
+            self.AdminFilterList=[NSMutableArray arrayWithArray:tempArray];
+            break;
+        default:
+            self.AdminFilterList=[NSMutableArray arrayWithArray:self.AdminList];
+            break;
+    }
+}
+
+#pragma mark - UISearchDisplayController Delegate Methods
+//当文本内容发生改变时候，向表视图数据源发出重新加载消息
+-(BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString{
+    [self filterContentForSearText:searchString scope:self.AdminSearchbar.selectedScopeButtonIndex];
+    //YES情况下表视图可以重新加载
+    return  YES;
+}
+
 
 @end

@@ -10,8 +10,16 @@
 
 @implementation CommonCell
 
+@synthesize Name;
+@synthesize Password;
+@synthesize YesOrNo;
+@synthesize TestName;
+
 - (void)awakeFromNib {
+    
+    //Name.text=@"1";
     // Initialization code
+    TestName=@"1";
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

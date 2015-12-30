@@ -34,7 +34,8 @@
 }
 */
 
-- (IBAction)question:(id)sender {
+
+- (IBAction)Exit:(id)sender {
     
     [self dismissViewControllerAnimated:YES completion:^{}];
     

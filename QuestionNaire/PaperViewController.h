@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PaperViewController : UIViewController
-- (IBAction)paper:(id)sender;
+@interface PaperViewController : UITableViewController
+
+- (IBAction)PaperExit:(id)sender;
 
 @end
